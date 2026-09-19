@@ -37,7 +37,7 @@
 <h1>動漫新集數追蹤</h1>
 
 <div class="add-row">
-  <input type="text" id="keywordInput" placeholder="輸入片名，例如：荒歲福崇" />
+  <input type="text" id="keywordInput" placeholder="輸入片名關鍵字" />
   <button onclick="addKeyword()">新增</button>
   <button class="primary" onclick="searchAll()">搜尋全部</button>
 </div>
@@ -49,8 +49,24 @@
 const API_KEY = 'AIzaSyAhQt6ZK9IdKGQ0BrBPQYFsxQPP2EJ0C_U';
 const STORAGE_KEY = 'anime_keywords';
 
+const DEFAULT_KEYWORDS = [
+  '开局大帝我的弟子',
+  '大佬到宗门当弟子',
+  '寒山枭雄',
+  '女帝逼走我后才发现我无敌天下',
+  '毒手巫醫',
+  '苏家有个小道姑捉鬼画符',
+  '隐居魔帝和离后我不装了',
+  '摊牌女儿其实爹已世间无敌',
+  '九龙帝尊',
+  '他下界签到万年'
+];
+
 function getKeywords() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored) return JSON.parse(stored);
+  saveKeywords(DEFAULT_KEYWORDS);
+  return DEFAULT_KEYWORDS;
 }
 
 function saveKeywords(kws) {
