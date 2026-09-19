@@ -8,20 +8,24 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: sans-serif; background: #111; color: #eee; padding: 16px; max-width: 600px; margin: auto; }
   h1 { font-size: 18px; font-weight: 500; margin-bottom: 16px; color: #fff; }
-  .add-row { display: flex; gap: 8px; margin-bottom: 20px; }
+  .add-row { display: flex; gap: 8px; margin-bottom: 12px; }
   input[type="text"] { flex: 1; background: #222; border: 0.5px solid #444; color: #eee; border-radius: 8px; padding: 8px 12px; font-size: 14px; outline: none; }
   input[type="text"]:focus { border-color: #888; }
   button { background: #333; border: 0.5px solid #555; color: #eee; border-radius: 8px; padding: 8px 14px; font-size: 14px; cursor: pointer; white-space: nowrap; }
   button:hover { background: #444; }
   button.primary { background: #c00; border-color: #e00; color: #fff; }
   button.primary:hover { background: #e00; }
-  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-  .tag { background: #222; border: 0.5px solid #444; border-radius: 20px; padding: 4px 12px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
-  .tag span { cursor: default; }
-  .tag .del { cursor: pointer; color: #888; font-size: 16px; line-height: 1; }
-  .tag .del:hover { color: #f55; }
+  .anime-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .anime-item { background: #1e1e1e; border: 0.5px solid #333; border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+  .anime-name { flex: 1; font-size: 13px; }
+  .season-ctrl { display: flex; align-items: center; gap: 6px; }
+  .season-btn { background: #333; border: 0.5px solid #555; color: #eee; border-radius: 6px; width: 28px; height: 28px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+  .season-btn:hover { background: #444; }
+  .season-label { font-size: 12px; color: #aaa; min-width: 36px; text-align: center; }
+  .del-btn { background: none; border: none; color: #555; font-size: 18px; cursor: pointer; padding: 0 2px; }
+  .del-btn:hover { color: #f55; }
   .results { display: flex; flex-direction: column; gap: 12px; }
-  .video-card { background: #1a1a1a; border: 0.5px solid #333; border-radius: 12px; overflow: hidden; display: flex; gap: 12px; padding: 10px; cursor: pointer; text-decoration: none; color: inherit; }
+  .video-card { background: #1a1a1a; border: 0.5px solid #333; border-radius: 12px; overflow: hidden; display: flex; gap: 12px; padding: 10px; text-decoration: none; color: inherit; }
   .video-card:hover { border-color: #666; }
   .thumb { width: 120px; min-width: 120px; height: 68px; object-fit: cover; border-radius: 6px; background: #333; }
   .info { flex: 1; overflow: hidden; }
@@ -29,7 +33,7 @@
   .meta { font-size: 12px; color: #888; }
   .section-title { font-size: 13px; color: #888; margin-bottom: 8px; margin-top: 4px; }
   .loading { text-align: center; color: #888; font-size: 14px; padding: 20px; }
-  .empty { text-align: center; color: #555; font-size: 14px; padding: 30px; }
+  .empty { text-align: center; color: #555; font-size: 14px; padding: 16px; }
   .error { color: #f55; font-size: 13px; padding: 8px 0; }
 </style>
 </head>
@@ -38,78 +42,92 @@
 
 <div class="add-row">
   <input type="text" id="keywordInput" placeholder="輸入片名關鍵字" />
-  <button onclick="addKeyword()">新增</button>
+  <button onclick="addAnime()">新增</button>
   <button class="primary" onclick="searchAll()">搜尋全部</button>
 </div>
 
-<div class="tag-list" id="tagList"></div>
+<div class="anime-list" id="animeList"></div>
 <div id="results" class="results"></div>
 
 <script>
 const API_KEY = 'AIzaSyAhQt6ZK9IdKGQ0BrBPQYFsxQPP2EJ0C_U';
-const STORAGE_KEY = 'anime_keywords';
+const STORAGE_KEY = 'anime_list_v2';
 
-const DEFAULT_KEYWORDS = [
-  '开局大帝我的弟子',
-  '大佬到宗门当弟子',
-  '寒山枭雄',
-  '女帝逼走我后才发现我无敌天下',
-  '毒手巫醫',
-  '苏家有个小道姑捉鬼画符',
-  '隐居魔帝和离后我不装了',
-  '摊牌女儿其实爹已世间无敌',
-  '九龙帝尊',
-  '他下界签到万年'
+const DEFAULT_LIST = [
+  { name: '开局大帝我的弟子', season: 1 },
+  { name: '大佬到宗门当弟子', season: 1 },
+  { name: '寒山枭雄', season: 1 },
+  { name: '女帝逼走我后才发现我无敌天下', season: 1 },
+  { name: '毒手巫醫', season: 1 },
+  { name: '苏家有个小道姑捉鬼画符', season: 1 },
+  { name: '隐居魔帝和离后我不装了', season: 1 },
+  { name: '摊牌女儿其实爹已世间无敌', season: 1 },
+  { name: '九龙帝尊', season: 1 },
+  { name: '他下界签到万年', season: 1 }
 ];
 
-function getKeywords() {
+function getList() {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored) return JSON.parse(stored);
-  saveKeywords(DEFAULT_KEYWORDS);
-  return DEFAULT_KEYWORDS;
+  saveList(DEFAULT_LIST);
+  return DEFAULT_LIST;
 }
 
-function saveKeywords(kws) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(kws));
+function saveList(list) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
 }
 
-function renderTags() {
-  const kws = getKeywords();
-  const el = document.getElementById('tagList');
-  el.innerHTML = kws.map((k, i) => `
-    <div class="tag">
-      <span>${k}</span>
-      <span class="del" onclick="removeKeyword(${i})">×</span>
+function renderList() {
+  const list = getList();
+  const el = document.getElementById('animeList');
+  el.innerHTML = list.map((a, i) => `
+    <div class="anime-item">
+      <div class="anime-name">${a.name}</div>
+      <div class="season-ctrl">
+        <button class="season-btn" onclick="changeSeason(${i}, -1)">−</button>
+        <span class="season-label">看到S${a.season}</span>
+        <button class="season-btn" onclick="changeSeason(${i}, 1)">+</button>
+      </div>
+      <button class="del-btn" onclick="removeAnime(${i})">×</button>
     </div>
   `).join('');
 }
 
-function addKeyword() {
+function addAnime() {
   const input = document.getElementById('keywordInput');
   const val = input.value.trim();
   if (!val) return;
-  const kws = getKeywords();
-  if (!kws.includes(val)) {
-    kws.push(val);
-    saveKeywords(kws);
-    renderTags();
+  const list = getList();
+  if (!list.find(a => a.name === val)) {
+    list.push({ name: val, season: 1 });
+    saveList(list);
+    renderList();
   }
   input.value = '';
 }
 
-function removeKeyword(i) {
-  const kws = getKeywords();
-  kws.splice(i, 1);
-  saveKeywords(kws);
-  renderTags();
+function removeAnime(i) {
+  const list = getList();
+  list.splice(i, 1);
+  saveList(list);
+  renderList();
+}
+
+function changeSeason(i, delta) {
+  const list = getList();
+  list[i].season = Math.max(1, list[i].season + delta);
+  saveList(list);
+  renderList();
 }
 
 document.getElementById('keywordInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') addKeyword();
+  if (e.key === 'Enter') addAnime();
 });
 
+const SEASON_MAP = ['一','二','三','四','五','六','七','八','九','十'];
+
 async function searchYT(query) {
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&order=date&maxResults=3&key=${API_KEY}`;
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&order=date&maxResults=4&key=${API_KEY}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('API 錯誤 ' + res.status);
   const data = await res.json();
@@ -124,22 +142,34 @@ function timeAgo(dateStr) {
   return new Date(dateStr).toLocaleDateString('zh-TW');
 }
 
+function buildQuery(anime) {
+  const nextSeason = anime.season + 1;
+  const zh = SEASON_MAP[nextSeason - 1] || nextSeason;
+  return `${anime.name} 第${zh}季`;
+}
+
 async function searchAll() {
-  const kws = getKeywords();
-  if (kws.length === 0) {
-    document.getElementById('results').innerHTML = '<div class="empty">請先新增片名關鍵字</div>';
+  const list = getList();
+  if (list.length === 0) {
+    document.getElementById('results').innerHTML = '<div class="empty">請先新增片名</div>';
     return;
   }
   document.getElementById('results').innerHTML = '<div class="loading">搜尋中⋯</div>';
   let html = '';
-  for (const kw of kws) {
-    html += `<div class="section-title">「${kw}」最新影片</div>`;
+  for (const anime of list) {
+    const query = buildQuery(anime);
+    html += `<div class="section-title">「${anime.name}」第${anime.season + 1}季新影片</div>`;
     try {
-      const items = await searchYT(kw);
-      if (items.length === 0) {
-        html += `<div class="empty">找不到結果</div>`;
+      const items = await searchYT(query);
+      const filtered = items.filter(item => {
+        const t = item.snippet.title;
+        return t.includes(anime.name.slice(0, 4));
+      });
+      const show = filtered.length > 0 ? filtered : items;
+      if (show.length === 0) {
+        html += `<div class="empty">找不到第${anime.season + 1}季相關影片</div>`;
       } else {
-        for (const item of items) {
+        for (const item of show.slice(0, 3)) {
           const vid = item.id.videoId;
           const s = item.snippet;
           const thumb = s.thumbnails?.medium?.url || '';
@@ -160,7 +190,7 @@ async function searchAll() {
   document.getElementById('results').innerHTML = html;
 }
 
-renderTags();
+renderList();
 </script>
 </body>
 </html>
