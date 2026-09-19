@@ -8,19 +8,15 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: sans-serif; background: #111; color: #eee; padding: 20px 16px; max-width: 600px; margin: auto; }
   h1 { font-size: 22px; font-weight: 600; margin-bottom: 20px; color: #fff; }
-  .add-row { display: flex; gap: 8px; margin-bottom: 10px; }
-  .add-row2 { display: flex; gap: 8px; margin-bottom: 16px; }
+  .add-row { display: flex; gap: 8px; margin-bottom: 16px; }
   input[type="text"] { flex: 1; background: #222; border: 0.5px solid #444; color: #eee; border-radius: 10px; padding: 12px 14px; font-size: 16px; outline: none; }
   input[type="text"]:focus { border-color: #888; }
-  input.exclude { border-color: #553333; }
-  input.exclude:focus { border-color: #aa5555; }
   button { background: #333; border: 0.5px solid #555; color: #eee; border-radius: 10px; padding: 12px 16px; font-size: 16px; cursor: pointer; white-space: nowrap; }
   button:active { background: #444; }
   button.primary { background: #c00; border-color: #e00; color: #fff; }
   button.primary:active { background: #e00; }
   .anime-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-  .anime-item { background: #1e1e1e; border: 0.5px solid #333; border-radius: 12px; padding: 12px 14px; }
-  .anime-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .anime-item { background: #1e1e1e; border: 0.5px solid #333; border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
   .anime-name { flex: 1; font-size: 15px; line-height: 1.4; }
   .season-ctrl { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .season-btn { background: #333; border: 0.5px solid #555; color: #eee; border-radius: 8px; width: 36px; height: 36px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
@@ -28,10 +24,6 @@
   .season-label { font-size: 14px; color: #aaa; min-width: 44px; text-align: center; }
   .del-btn { background: none; border: none; color: #555; font-size: 22px; cursor: pointer; padding: 0 4px; flex-shrink: 0; }
   .del-btn:active { color: #f55; }
-  .exclude-row { display: flex; align-items: center; gap: 8px; }
-  .exclude-label { font-size: 12px; color: #774444; white-space: nowrap; }
-  .exclude-input { flex: 1; background: #1a1111; border: 0.5px solid #553333; color: #cc8888; border-radius: 8px; padding: 6px 10px; font-size: 13px; outline: none; }
-  .exclude-input:focus { border-color: #aa5555; }
   .results { display: flex; flex-direction: column; gap: 14px; }
   .video-card { background: #1a1a1a; border: 0.5px solid #333; border-radius: 12px; overflow: hidden; display: flex; gap: 12px; padding: 12px; text-decoration: none; color: inherit; }
   .video-card:active { border-color: #666; }
@@ -49,10 +41,7 @@
 <h1>動漫新集數追蹤</h1>
 
 <div class="add-row">
-  <input type="text" id="keywordInput" placeholder="片名關鍵字" />
-</div>
-<div class="add-row2">
-  <input type="text" id="excludeInput" placeholder="排除詞（選填，如：全宗开挂）" class="exclude" />
+  <input type="text" id="keywordInput" placeholder="輸入片名關鍵字" />
   <button onclick="addAnime()">新增</button>
   <button class="primary" onclick="searchAll()">搜尋</button>
 </div>
@@ -62,19 +51,19 @@
 
 <script>
 const API_KEY = 'AIzaSyAhQt6ZK9IdKGQ0BrBPQYFsxQPP2EJ0C_U';
-const STORAGE_KEY = 'anime_list_v3';
+const STORAGE_KEY = 'anime_list_v4';
 
 const DEFAULT_LIST = [
-  { name: '开局大帝我的弟子', season: 1, exclude: '' },
-  { name: '大佬到宗门当弟子', season: 1, exclude: '全宗起飞' },
-  { name: '寒山枭雄', season: 1, exclude: '' },
-  { name: '女帝逼走我后才发现我无敌天下', season: 1, exclude: '' },
-  { name: '毒手巫醫', season: 1, exclude: '' },
-  { name: '苏家有个小道姑捉鬼画符', season: 1, exclude: '' },
-  { name: '隐居魔帝和离后我不装了', season: 1, exclude: '' },
-  { name: '摊牌女儿其实爹已世间无敌', season: 1, exclude: '' },
-  { name: '九龙帝尊', season: 1, exclude: '' },
-  { name: '他下界签到万年', season: 1, exclude: '' }
+  { name: '开局大帝我的弟子', season: 1 },
+  { name: '大佬到宗门当弟子', season: 1 },
+  { name: '寒山枭雄', season: 1 },
+  { name: '女帝逼走我后才发现我无敌天下', season: 1 },
+  { name: '毒手巫醫', season: 1 },
+  { name: '苏家有个小道姑捉鬼画符', season: 1 },
+  { name: '隐居魔帝和离后我不装了', season: 1 },
+  { name: '摊牌女儿其实爹已世间无敌', season: 1 },
+  { name: '九龙帝尊', season: 1 },
+  { name: '他下界签到万年', season: 1 }
 ];
 
 function getList() {
@@ -93,37 +82,28 @@ function renderList() {
   const el = document.getElementById('animeList');
   el.innerHTML = list.map((a, i) => `
     <div class="anime-item">
-      <div class="anime-top">
-        <div class="anime-name">${a.name}</div>
-        <div class="season-ctrl">
-          <button class="season-btn" onclick="changeSeason(${i}, -1)">−</button>
-          <span class="season-label">S${a.season}</span>
-          <button class="season-btn" onclick="changeSeason(${i}, 1)">+</button>
-        </div>
-        <button class="del-btn" onclick="removeAnime(${i})">×</button>
+      <div class="anime-name">${a.name}</div>
+      <div class="season-ctrl">
+        <button class="season-btn" onclick="changeSeason(${i}, -1)">−</button>
+        <span class="season-label">S${a.season}</span>
+        <button class="season-btn" onclick="changeSeason(${i}, 1)">+</button>
       </div>
-      <div class="exclude-row">
-        <span class="exclude-label">排除：</span>
-        <input class="exclude-input" value="${a.exclude || ''}" placeholder="排除詞（選填）"
-          onchange="updateExclude(${i}, this.value)" />
-      </div>
+      <button class="del-btn" onclick="removeAnime(${i})">×</button>
     </div>
   `).join('');
 }
 
 function addAnime() {
   const input = document.getElementById('keywordInput');
-  const excInput = document.getElementById('excludeInput');
   const val = input.value.trim();
   if (!val) return;
   const list = getList();
   if (!list.find(a => a.name === val)) {
-    list.push({ name: val, season: 1, exclude: excInput.value.trim() });
+    list.push({ name: val, season: 1 });
     saveList(list);
     renderList();
   }
   input.value = '';
-  excInput.value = '';
 }
 
 function removeAnime(i) {
@@ -140,16 +120,7 @@ function changeSeason(i, delta) {
   renderList();
 }
 
-function updateExclude(i, val) {
-  const list = getList();
-  list[i].exclude = val.trim();
-  saveList(list);
-}
-
 document.getElementById('keywordInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('excludeInput').focus();
-});
-document.getElementById('excludeInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') addAnime();
 });
 
@@ -171,14 +142,6 @@ function timeAgo(dateStr) {
   return new Date(dateStr).toLocaleDateString('zh-TW');
 }
 
-function buildQuery(anime) {
-  const nextSeason = anime.season + 1;
-  const zh = SEASON_MAP[nextSeason - 1] || nextSeason;
-  let q = `${anime.name} 第${zh}季`;
-  if (anime.exclude) q += ` -${anime.exclude}`;
-  return q;
-}
-
 async function searchAll() {
   const list = getList();
   if (list.length === 0) {
@@ -188,19 +151,16 @@ async function searchAll() {
   document.getElementById('results').innerHTML = '<div class="loading">搜尋中⋯</div>';
   let html = '';
   for (const anime of list) {
-    const query = buildQuery(anime);
-    html += `<div class="section-title">「${anime.name}」第${anime.season + 1}季新影片</div>`;
+    const nextSeason = anime.season + 1;
+    const zh = SEASON_MAP[nextSeason - 1] || nextSeason;
+    const query = `${anime.name} 第${zh}季`;
+    html += `<div class="section-title">「${anime.name}」第${nextSeason}季新影片</div>`;
     try {
       const items = await searchYT(query);
-      const filtered = items.filter(item => {
-        const t = item.snippet.title;
-        if (anime.exclude && t.includes(anime.exclude)) return false;
-        return true;
-      });
-      if (filtered.length === 0) {
-        html += `<div class="empty">找不到第${anime.season + 1}季相關影片</div>`;
+      if (items.length === 0) {
+        html += `<div class="empty">找不到第${nextSeason}季相關影片</div>`;
       } else {
-        for (const item of filtered.slice(0, 3)) {
+        for (const item of items) {
           const vid = item.id.videoId;
           const s = item.snippet;
           const thumb = s.thumbnails?.medium?.url || '';
