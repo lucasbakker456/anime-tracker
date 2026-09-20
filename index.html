@@ -27,7 +27,9 @@
   .results { display: flex; flex-direction: column; gap: 14px; }
   .video-card { background: #1a1a1a; border: 0.5px solid #333; border-radius: 12px; overflow: hidden; display: flex; gap: 12px; padding: 12px; text-decoration: none; color: inherit; }
   .video-card:active { border-color: #666; }
-  .thumb { width: 130px; min-width: 130px; height: 74px; object-fit: cover; border-radius: 8px; background: #333; }
+  .thumb-wrap { position: relative; width: 130px; min-width: 130px; height: 74px; flex-shrink: 0; }
+  .thumb { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; background: #333; display: block; }
+  .duration { position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.8); color: #fff; font-size: 12px; padding: 1px 5px; border-radius: 4px; }
   .info { flex: 1; overflow: hidden; }
   .title { font-size: 15px; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; }
   .meta { font-size: 13px; color: #888; }
@@ -73,14 +75,11 @@ function getList() {
   return DEFAULT_LIST;
 }
 
-function saveList(list) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-}
+function saveList(list) { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
 
 function renderList() {
   const list = getList();
-  const el = document.getElementById('animeList');
-  el.innerHTML = list.map((a, i) => `
+  document.getElementById('animeList').innerHTML = list.map((a, i) => `
     <div class="anime-item">
       <div class="anime-name">${a.name}</div>
       <div class="season-ctrl">
@@ -126,12 +125,47 @@ document.getElementById('keywordInput').addEventListener('keydown', e => {
 
 const SEASON_MAP = ['一','二','三','四','五','六','七','八','九','十'];
 
+function seasonMatches(title, season) {
+  const zh = SEASON_MAP[season - 1];
+  // 比對「第二季」或「第2季」或「S2」或「season 2」
+  const patterns = [
+    `第${zh}季`,
+    `第${season}季`,
+    `S${season}`,
+    `season ${season}`,
+    `Season ${season}`,
+  ];
+  return patterns.some(p => title.includes(p));
+}
+
 async function searchYT(query) {
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&order=date&maxResults=5&key=${API_KEY}`;
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&order=date&maxResults=10&key=${API_KEY}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('API 錯誤 ' + res.status);
   const data = await res.json();
   return data.items || [];
+}
+
+async function getDurations(videoIds) {
+  const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds.join(',')}&key=${API_KEY}`;
+  const res = await fetch(url);
+  if (!res.ok) return {};
+  const data = await res.json();
+  const map = {};
+  for (const item of data.items || []) {
+    map[item.id] = parseDuration(item.contentDetails.duration);
+  }
+  return map;
+}
+
+function parseDuration(iso) {
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!m) return '';
+  const h = parseInt(m[1] || 0);
+  const min = parseInt(m[2] || 0);
+  const s = parseInt(m[3] || 0);
+  if (h > 0) return `${h}:${String(min).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${min}:${String(s).padStart(2,'0')}`;
 }
 
 function timeAgo(dateStr) {
@@ -157,16 +191,28 @@ async function searchAll() {
     html += `<div class="section-title">「${anime.name}」第${nextSeason}季新影片</div>`;
     try {
       const items = await searchYT(query);
-      if (items.length === 0) {
+      // 過濾：標題必須含有指定季數
+      const filtered = items.filter(item => seasonMatches(item.snippet.title, nextSeason));
+      const show = filtered.length > 0 ? filtered : items; // 若過濾後為空則顯示原始結果
+      const note = filtered.length === 0 ? '<div class="empty" style="font-size:12px;padding:4px 0 8px">（找不到精確季數，顯示相關影片）</div>' : '';
+
+      if (show.length === 0) {
         html += `<div class="empty">找不到第${nextSeason}季相關影片</div>`;
       } else {
-        for (const item of items) {
+        html += note;
+        const ids = show.slice(0, 5).map(i => i.id.videoId);
+        const durations = await getDurations(ids);
+        for (const item of show.slice(0, 5)) {
           const vid = item.id.videoId;
           const s = item.snippet;
           const thumb = s.thumbnails?.medium?.url || '';
+          const dur = durations[vid] || '';
           html += `
             <a class="video-card" href="https://www.youtube.com/watch?v=${vid}" target="_blank">
-              <img class="thumb" src="${thumb}" alt="" />
+              <div class="thumb-wrap">
+                <img class="thumb" src="${thumb}" alt="" />
+                ${dur ? `<span class="duration">${dur}</span>` : ''}
+              </div>
               <div class="info">
                 <div class="title">${s.title}</div>
                 <div class="meta">${s.channelTitle} · ${timeAgo(s.publishedAt)}</div>
