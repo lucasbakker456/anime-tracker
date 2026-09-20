@@ -17,7 +17,8 @@
   button.primary:active { background: #e00; }
   .anime-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
   .anime-item { background: #1e1e1e; border: 0.5px solid #333; border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
-  .anime-name { flex: 1; font-size: 15px; line-height: 1.4; }
+  .anime-name { flex: 1; font-size: 15px; line-height: 1.4; color: #eee; cursor: pointer; border-bottom: 1px dashed #444; padding-bottom: 2px; }
+  .anime-name-input { flex: 1; background: #2a2a2a; border: 0.5px solid #888; color: #fff; border-radius: 8px; padding: 6px 10px; font-size: 15px; outline: none; }
   .season-ctrl { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .season-btn { background: #333; border: 0.5px solid #555; color: #eee; border-radius: 8px; width: 36px; height: 36px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
   .season-btn:active { background: #444; }
@@ -81,7 +82,7 @@ function renderList() {
   const list = getList();
   document.getElementById('animeList').innerHTML = list.map((a, i) => `
     <div class="anime-item">
-      <div class="anime-name">${a.name}</div>
+      <span class="anime-name" onclick="editName(${i}, this)" title="點擊編輯">${a.name}</span>
       <div class="season-ctrl">
         <button class="season-btn" onclick="changeSeason(${i}, -1)">−</button>
         <span class="season-label">S${a.season}</span>
@@ -90,6 +91,32 @@ function renderList() {
       <button class="del-btn" onclick="removeAnime(${i})">×</button>
     </div>
   `).join('');
+}
+
+function editName(i, el) {
+  const list = getList();
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'anime-name-input';
+  input.value = list[i].name;
+  el.replaceWith(input);
+  input.focus();
+  input.select();
+
+  function save() {
+    const val = input.value.trim();
+    if (val) {
+      list[i].name = val;
+      saveList(list);
+    }
+    renderList();
+  }
+
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') input.blur();
+    if (e.key === 'Escape') renderList();
+  });
 }
 
 function addAnime() {
@@ -127,32 +154,24 @@ const SEASON_MAP = ['一','二','三','四','五','六','七','八','九','十']
 
 function seasonMatches(title, season) {
   const zh = SEASON_MAP[season - 1];
-  // 比對「第二季」或「第2季」或「S2」或「season 2」
-  const patterns = [
-    `第${zh}季`,
-    `第${season}季`,
-    `S${season}`,
-    `season ${season}`,
-    `Season ${season}`,
-  ];
-  return patterns.some(p => title.includes(p));
+  return [
+    `第${zh}季`, `第${season}季`, `S${season}`, `season ${season}`, `Season ${season}`
+  ].some(p => title.includes(p));
 }
 
 async function searchYT(query) {
   const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&order=date&maxResults=10&key=${API_KEY}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('API 錯誤 ' + res.status);
-  const data = await res.json();
-  return data.items || [];
+  return (await res.json()).items || [];
 }
 
 async function getDurations(videoIds) {
   const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds.join(',')}&key=${API_KEY}`;
   const res = await fetch(url);
   if (!res.ok) return {};
-  const data = await res.json();
   const map = {};
-  for (const item of data.items || []) {
+  for (const item of (await res.json()).items || []) {
     map[item.id] = parseDuration(item.contentDetails.duration);
   }
   return map;
@@ -161,9 +180,7 @@ async function getDurations(videoIds) {
 function parseDuration(iso) {
   const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
   if (!m) return '';
-  const h = parseInt(m[1] || 0);
-  const min = parseInt(m[2] || 0);
-  const s = parseInt(m[3] || 0);
+  const h = parseInt(m[1] || 0), min = parseInt(m[2] || 0), s = parseInt(m[3] || 0);
   if (h > 0) return `${h}:${String(min).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   return `${min}:${String(s).padStart(2,'0')}`;
 }
@@ -191,11 +208,9 @@ async function searchAll() {
     html += `<div class="section-title">「${anime.name}」第${nextSeason}季新影片</div>`;
     try {
       const items = await searchYT(query);
-      // 過濾：標題必須含有指定季數
       const filtered = items.filter(item => seasonMatches(item.snippet.title, nextSeason));
-      const show = filtered.length > 0 ? filtered : items; // 若過濾後為空則顯示原始結果
+      const show = filtered.length > 0 ? filtered : items;
       const note = filtered.length === 0 ? '<div class="empty" style="font-size:12px;padding:4px 0 8px">（找不到精確季數，顯示相關影片）</div>' : '';
-
       if (show.length === 0) {
         html += `<div class="empty">找不到第${nextSeason}季相關影片</div>`;
       } else {
