@@ -5,46 +5,91 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>動漫新集數追蹤</title>
 <style>
+  :root {
+    --bg: #f2f2f7;
+    --surface: #ffffff;
+    --surface2: #f8f8f8;
+    --border: #e0e0e0;
+    --text: #111111;
+    --text2: #555555;
+    --text3: #888888;
+    --accent: #c00;
+    --accent2: #e00;
+    --btn-bg: #e5e5ea;
+    --btn-border: #d0d0d0;
+    --btn-text: #111;
+    --watched: #1a7a4a;
+    --irrelevant: #a00;
+    --watched-bg: #e8f5ee;
+    --irrelevant-bg: #fdecea;
+    --divider: #e0e0e0;
+    --input-bg: #fff;
+    --tag-bg: #e5e5ea;
+    --note: #888;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1e;
+      --surface: #2c2c2e;
+      --surface2: #3a3a3c;
+      --border: #3a3a3c;
+      --text: #f2f2f7;
+      --text2: #cccccc;
+      --text3: #aaaaaa;
+      --accent: #ff453a;
+      --accent2: #ff6961;
+      --btn-bg: #3a3a3c;
+      --btn-border: #555;
+      --btn-text: #f2f2f7;
+      --watched: #30d158;
+      --irrelevant: #ff453a;
+      --watched-bg: #1a2e22;
+      --irrelevant-bg: #2e1a1a;
+      --divider: #3a3a3c;
+      --input-bg: #2c2c2e;
+      --tag-bg: #3a3a3c;
+      --note: #888;
+    }
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: sans-serif; background: #111; color: #eee; padding: 20px 16px; max-width: 600px; margin: auto; }
-  h1 { font-size: 22px; font-weight: 600; margin-bottom: 20px; color: #fff; }
+  body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 20px 16px; max-width: 600px; margin: auto; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
   .add-row { display: flex; gap: 8px; margin-bottom: 16px; }
-  input[type="text"] { flex: 1; background: #222; border: 0.5px solid #444; color: #eee; border-radius: 10px; padding: 12px 14px; font-size: 16px; outline: none; }
+  input[type="text"] { flex: 1; background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 12px 14px; font-size: 16px; outline: none; }
   input[type="text"]:focus { border-color: #888; }
-  button { background: #333; border: 0.5px solid #555; color: #eee; border-radius: 10px; padding: 12px 16px; font-size: 16px; cursor: pointer; white-space: nowrap; }
-  button:active { background: #444; }
-  button.primary { background: #c00; border-color: #e00; color: #fff; }
-  button.primary:active { background: #e00; }
+  button { background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--btn-text); border-radius: 10px; padding: 12px 16px; font-size: 16px; cursor: pointer; white-space: nowrap; font-weight: 500; }
+  button:active { opacity: 0.7; }
+  button.primary { background: var(--accent); border-color: var(--accent2); color: #fff; }
   .anime-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-  .anime-item { background: #1e1e1e; border: 0.5px solid #333; border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
-  .anime-name { flex: 1; font-size: 15px; line-height: 1.4; color: #eee; cursor: pointer; border-bottom: 1px dashed #444; padding-bottom: 2px; }
-  .anime-name-input { flex: 1; background: #2a2a2a; border: 0.5px solid #888; color: #fff; border-radius: 8px; padding: 6px 10px; font-size: 15px; outline: none; }
+  .anime-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+  .anime-name { flex: 1; font-size: 15px; line-height: 1.4; color: var(--text); cursor: pointer; border-bottom: 1px dashed var(--border); padding-bottom: 2px; }
+  .anime-name-input { flex: 1; background: var(--input-bg); border: 1px solid #888; color: var(--text); border-radius: 8px; padding: 6px 10px; font-size: 15px; outline: none; }
   .season-ctrl { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .season-btn { background: #333; border: 0.5px solid #555; color: #eee; border-radius: 8px; width: 36px; height: 36px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
-  .season-btn:active { background: #444; }
-  .season-label { font-size: 14px; color: #aaa; min-width: 44px; text-align: center; }
-  .del-btn { background: none; border: none; color: #555; font-size: 22px; cursor: pointer; padding: 0 4px; flex-shrink: 0; }
-  .del-btn:active { color: #f55; }
+  .season-btn { background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--btn-text); border-radius: 8px; width: 36px; height: 36px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; font-weight: 600; }
+  .season-btn:active { opacity: 0.7; }
+  .season-label { font-size: 14px; color: var(--text2); min-width: 44px; text-align: center; font-weight: 600; }
+  .del-btn { background: none; border: none; color: var(--text3); font-size: 22px; cursor: pointer; padding: 0 4px; flex-shrink: 0; }
+  .del-btn:active { color: var(--irrelevant); }
   .results { display: flex; flex-direction: column; gap: 14px; }
-  .video-card { background: #1a1a1a; border: 0.5px solid #333; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+  .video-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; text-decoration: none; color: inherit; }
   .video-main { display: flex; gap: 12px; padding: 12px; }
-  .video-card:active .video-main { opacity: 0.8; }
   .thumb-wrap { position: relative; width: 130px; min-width: 130px; height: 74px; flex-shrink: 0; }
-  .thumb { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; background: #333; display: block; }
-  .duration { position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.8); color: #fff; font-size: 12px; padding: 1px 5px; border-radius: 4px; }
+  .thumb { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; background: var(--surface2); display: block; }
+  .duration { position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.75); color: #fff; font-size: 12px; padding: 1px 5px; border-radius: 4px; font-weight: 600; }
   .info { flex: 1; overflow: hidden; }
-  .title { font-size: 15px; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; }
-  .meta { font-size: 13px; color: #888; }
-  .video-actions { display: flex; border-top: 0.5px solid #2a2a2a; }
-  .action-btn { flex: 1; padding: 10px; font-size: 13px; text-align: center; cursor: pointer; border: none; background: none; }
-  .action-btn.watched { color: #4a9; border-right: 0.5px solid #2a2a2a; }
-  .action-btn.watched:active { background: #1a2a22; }
-  .action-btn.irrelevant { color: #a44; }
-  .action-btn.irrelevant:active { background: #2a1a1a; }
-  .section-title { font-size: 14px; color: #888; margin-bottom: 10px; margin-top: 6px; }
-  .loading { text-align: center; color: #888; font-size: 16px; padding: 24px; }
-  .empty { text-align: center; color: #555; font-size: 15px; padding: 16px; }
-  .error { color: #f55; font-size: 14px; padding: 8px 0; }
+  .title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; }
+  .meta { font-size: 13px; color: var(--text3); }
+  .video-actions { display: flex; border-top: 1px solid var(--divider); }
+  .action-btn { flex: 1; padding: 11px; font-size: 14px; font-weight: 600; text-align: center; cursor: pointer; border: none; background: none; }
+  .action-btn.watched { color: var(--watched); border-right: 1px solid var(--divider); }
+  .action-btn.watched:active { background: var(--watched-bg); }
+  .action-btn.irrelevant { color: var(--irrelevant); }
+  .action-btn.irrelevant:active { background: var(--irrelevant-bg); }
+  .section-title { font-size: 14px; color: var(--text3); margin-bottom: 10px; margin-top: 6px; font-weight: 500; }
+  .loading { text-align: center; color: var(--text3); font-size: 16px; padding: 24px; }
+  .empty { text-align: center; color: var(--text3); font-size: 14px; padding: 16px; }
+  .note { text-align: center; color: var(--note); font-size: 12px; padding: 4px 0 8px; }
+  .error { color: var(--irrelevant); font-size: 14px; padding: 8px 0; }
 </style>
 </head>
 <body>
@@ -80,14 +125,10 @@ const DEFAULT_LIST = [
 function getList() {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored) return JSON.parse(stored);
-  saveList(DEFAULT_LIST);
-  return DEFAULT_LIST;
+  saveList(DEFAULT_LIST); return DEFAULT_LIST;
 }
 function saveList(list) { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
-
-function getHidden() {
-  try { return JSON.parse(localStorage.getItem(HIDDEN_KEY) || '[]'); } catch { return []; }
-}
+function getHidden() { try { return JSON.parse(localStorage.getItem(HIDDEN_KEY) || '[]'); } catch { return []; } }
 function hideVideo(vid) {
   const h = getHidden();
   if (!h.includes(vid)) { h.push(vid); localStorage.setItem(HIDDEN_KEY, JSON.stringify(h)); }
@@ -111,133 +152,95 @@ function renderList() {
 function editName(i, el) {
   const list = getList();
   const input = document.createElement('input');
-  input.type = 'text';
-  input.className = 'anime-name-input';
-  input.value = list[i].name;
-  el.replaceWith(input);
-  input.focus(); input.select();
+  input.type = 'text'; input.className = 'anime-name-input'; input.value = list[i].name;
+  el.replaceWith(input); input.focus(); input.select();
   function save() {
     const val = input.value.trim();
     if (val) { list[i].name = val; saveList(list); }
     renderList();
   }
   input.addEventListener('blur', save);
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') input.blur();
-    if (e.key === 'Escape') renderList();
-  });
+  input.addEventListener('keydown', e => { if (e.key==='Enter') input.blur(); if (e.key==='Escape') renderList(); });
 }
 
 function addAnime() {
   const input = document.getElementById('keywordInput');
-  const val = input.value.trim();
-  if (!val) return;
+  const val = input.value.trim(); if (!val) return;
   const list = getList();
-  if (!list.find(a => a.name === val)) {
-    list.push({ name: val, season: 1 });
-    saveList(list); renderList();
-  }
+  if (!list.find(a => a.name === val)) { list.push({ name: val, season: 1 }); saveList(list); renderList(); }
   input.value = '';
 }
-
-function removeAnime(i) {
-  const list = getList(); list.splice(i, 1); saveList(list); renderList();
-}
-
-function changeSeason(i, delta) {
-  const list = getList();
-  list[i].season = Math.max(1, list[i].season + delta);
-  saveList(list); renderList();
-}
-
-document.getElementById('keywordInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') addAnime();
-});
+function removeAnime(i) { const list=getList(); list.splice(i,1); saveList(list); renderList(); }
+function changeSeason(i, delta) { const list=getList(); list[i].season=Math.max(1,list[i].season+delta); saveList(list); renderList(); }
+document.getElementById('keywordInput').addEventListener('keydown', e => { if(e.key==='Enter') addAnime(); });
 
 const SEASON_MAP = ['一','二','三','四','五','六','七','八','九','十'];
-
 function seasonMatches(title, season) {
-  const zh = SEASON_MAP[season - 1];
-  return [`第${zh}季`,`第${season}季`,`S${season}`,`season ${season}`,`Season ${season}`].some(p => title.includes(p));
+  const zh = SEASON_MAP[season-1];
+  return [`第${zh}季`,`第${season}季`,`S${season}`,`season ${season}`,`Season ${season}`].some(p=>title.includes(p));
 }
 
 async function searchYT(query) {
   const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&order=date&maxResults=10&key=${API_KEY}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('API 錯誤 ' + res.status);
+  const res = await fetch(url); if (!res.ok) throw new Error('API 錯誤 '+res.status);
   return (await res.json()).items || [];
 }
-
 async function getDurations(videoIds) {
   const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds.join(',')}&key=${API_KEY}`;
-  const res = await fetch(url);
-  if (!res.ok) return {};
+  const res = await fetch(url); if (!res.ok) return {};
   const map = {};
-  for (const item of (await res.json()).items || []) {
-    map[item.id] = parseDuration(item.contentDetails.duration);
-  }
+  for (const item of (await res.json()).items||[]) map[item.id] = parseDuration(item.contentDetails.duration);
   return map;
 }
-
 function parseDuration(iso) {
-  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
-  if (!m) return '';
-  const h = parseInt(m[1]||0), min = parseInt(m[2]||0), s = parseInt(m[3]||0);
-  if (h > 0) return `${h}:${String(min).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/); if (!m) return '';
+  const h=parseInt(m[1]||0), min=parseInt(m[2]||0), s=parseInt(m[3]||0);
+  if (h>0) return `${h}:${String(min).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   return `${min}:${String(s).padStart(2,'0')}`;
 }
-
 function timeAgo(dateStr) {
-  const diff = (Date.now() - new Date(dateStr)) / 1000;
-  if (diff < 3600) return Math.floor(diff/60) + ' 分鐘前';
-  if (diff < 86400) return Math.floor(diff/3600) + ' 小時前';
-  if (diff < 86400*30) return Math.floor(diff/86400) + ' 天前';
+  const diff=(Date.now()-new Date(dateStr))/1000;
+  if (diff<3600) return Math.floor(diff/60)+' 分鐘前';
+  if (diff<86400) return Math.floor(diff/3600)+' 小時前';
+  if (diff<86400*30) return Math.floor(diff/86400)+' 天前';
   return new Date(dateStr).toLocaleDateString('zh-TW');
 }
-
 function markAndHide(vid, cardId) {
   hideVideo(vid);
-  const card = document.getElementById(cardId);
-  if (card) card.remove();
+  const card = document.getElementById(cardId); if (card) card.remove();
 }
 
 async function searchAll() {
   const list = getList();
-  if (list.length === 0) {
-    document.getElementById('results').innerHTML = '<div class="empty">請先新增片名</div>';
-    return;
-  }
-  document.getElementById('results').innerHTML = '<div class="loading">搜尋中⋯</div>';
+  if (list.length===0) { document.getElementById('results').innerHTML='<div class="empty">請先新增片名</div>'; return; }
+  document.getElementById('results').innerHTML='<div class="loading">搜尋中⋯</div>';
   const hidden = getHidden();
   let html = '';
   for (const anime of list) {
-    const nextSeason = anime.season + 1;
-    const zh = SEASON_MAP[nextSeason - 1] || nextSeason;
+    const nextSeason = anime.season+1;
+    const zh = SEASON_MAP[nextSeason-1]||nextSeason;
     const query = `${anime.name} 第${zh}季`;
     html += `<div class="section-title">「${anime.name}」第${nextSeason}季新影片</div>`;
     try {
       const items = await searchYT(query);
-      const filtered = items.filter(item => seasonMatches(item.snippet.title, nextSeason));
-      let show = (filtered.length > 0 ? filtered : items).filter(item => !hidden.includes(item.id.videoId));
-      const note = filtered.length === 0 ? '<div class="empty" style="font-size:12px;padding:4px 0 8px">（找不到精確季數，顯示相關影片）</div>' : '';
-      if (show.length === 0) {
-        html += `<div class="empty">找不到第${nextSeason}季相關影片</div>`;
-      } else {
+      const filtered = items.filter(item=>seasonMatches(item.snippet.title,nextSeason));
+      const show = (filtered.length>0?filtered:items).filter(item=>!hidden.includes(item.id.videoId));
+      const note = filtered.length===0 ? '<div class="note">（找不到精確季數，顯示相關影片）</div>' : '';
+      if (show.length===0) { html+=`<div class="empty">找不到第${nextSeason}季相關影片</div>`; }
+      else {
         html += note;
-        const ids = show.slice(0, 5).map(i => i.id.videoId);
+        const ids = show.slice(0,5).map(i=>i.id.videoId);
         const durations = await getDurations(ids);
-        for (const item of show.slice(0, 5)) {
-          const vid = item.id.videoId;
-          const s = item.snippet;
-          const thumb = s.thumbnails?.medium?.url || '';
-          const dur = durations[vid] || '';
-          const cardId = `card-${vid}`;
+        for (const item of show.slice(0,5)) {
+          const vid=item.id.videoId, s=item.snippet;
+          const thumb=s.thumbnails?.medium?.url||'', dur=durations[vid]||'';
+          const cardId=`card-${vid}`;
           html += `
             <div class="video-card" id="${cardId}">
               <a class="video-main" href="https://www.youtube.com/watch?v=${vid}" target="_blank">
                 <div class="thumb-wrap">
                   <img class="thumb" src="${thumb}" alt="" />
-                  ${dur ? `<span class="duration">${dur}</span>` : ''}
+                  ${dur?`<span class="duration">${dur}</span>`:''}
                 </div>
                 <div class="info">
                   <div class="title">${s.title}</div>
@@ -251,9 +254,7 @@ async function searchAll() {
             </div>`;
         }
       }
-    } catch (e) {
-      html += `<div class="error">搜尋失敗：${e.message}</div>`;
-    }
+    } catch(e) { html+=`<div class="error">搜尋失敗：${e.message}</div>`; }
   }
   document.getElementById('results').innerHTML = html;
 }
