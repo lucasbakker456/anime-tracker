@@ -58,6 +58,7 @@
   .duration { position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.75); color: #fff; font-size: 12px; padding: 1px 5px; border-radius: 4px; font-weight: 600; }
   .info { flex: 1; overflow: hidden; }
   .vtitle { font-size: 15px; font-weight: 600; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 4px; }
+  [id^="list-"] .vtitle { border-bottom: 1px dashed var(--border); padding-bottom: 2px; cursor: pointer; }
   .meta { font-size: 13px; color: var(--text3); }
   .video-actions { display: flex; border-top: 1px solid var(--divider); }
   .act { flex: 1; padding: 10px 4px; font-size: 13px; font-weight: 600; text-align: center; cursor: pointer; border: none; background: none; color: var(--text3); }
@@ -311,12 +312,33 @@ function videoCardHTML(v, context) {
           ${v.dur?`<span class="duration">${v.dur}</span>`:''}
         </div>
         <div class="info">
-          <div class="vtitle">${v.title}</div>
+          <div class="vtitle" onclick="editVideoTitle(event,'${v.id}','${context}')" title="點擊自訂名稱">${v.customTitle||v.title}</div>
           <div class="meta">${v.channel} · ${v.ago}</div>
         </div>
       </a>
       <div class="video-actions">${actions}</div>
     </div>`;
+}
+
+async function editVideoTitle(e, vid, context) {
+  e.preventDefault(); e.stopPropagation();
+  const el = e.target;
+  const isStored = ['watchlist','favorites','watched'].includes(context);
+  if (!isStored) return; // 搜尋結果不支援自訂
+  const current = el.textContent;
+  const inp = document.createElement('input');
+  inp.type = 'text'; inp.value = current;
+  inp.style.cssText = 'width:100%;font-size:15px;font-weight:600;background:var(--input-bg);border:1px solid #888;color:var(--text);border-radius:6px;padding:4px 8px;outline:none;';
+  el.replaceWith(inp); inp.focus(); inp.select();
+  async function save() {
+    const val = inp.value.trim() || current;
+    inp.replaceWith(el); el.textContent = val;
+    await sbFetch(`video_list?user_id=eq.${USER_ID}&list_type=eq.${context}&video_id=eq.${vid}`, {
+      method: 'PATCH', body: JSON.stringify({title: val})
+    });
+  }
+  inp.addEventListener('blur', save);
+  inp.addEventListener('keydown', e => { if(e.key==='Enter') inp.blur(); if(e.key==='Escape'){inp.replaceWith(el);} });
 }
 
 async function saveVideo(type,v){ await sbAddVideo(type,v); await sbAddHidden(v.id); const c=document.getElementById('card-'+v.id); if(c)c.remove(); }
