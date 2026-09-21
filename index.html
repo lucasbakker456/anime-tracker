@@ -207,7 +207,11 @@ function renderVList(type) {
 
 function videoCardHTML(v, context) {
   const isStored = ['watchlist','favorites','watched'].includes(context);
-  const removeBtn = isStored ? `<button class="act cross" onclick="removeFromListAndRender('${context}','${v.id}')">✕ 移除</button>` : '';
+  const removeBtn = isStored
+    ? (context === 'watched'
+        ? `<button class="act star" onclick="moveToFavorites(${JSON.stringify(v).replace(/"/g,'&quot;')})">⭐ 移至收藏</button><button class="act cross" onclick="removeFromListAndRender('${context}','${v.id}')">✕ 移除</button>`
+        : `<button class="act cross" onclick="removeFromListAndRender('${context}','${v.id}')">✕ 移除</button>`)
+    : '';
   return `
     <div class="video-card" id="card-${v.id}">
       <a class="video-main" href="https://www.youtube.com/watch?v=${v.id}" target="_blank">
@@ -245,6 +249,11 @@ function saveAndHide(type, v, cardId) {
 function justHide(vid, cardId) {
   addHidden(vid);
   const card=document.getElementById(cardId); if(card) card.remove();
+}
+function moveToFavorites(v) {
+  addToList('favorites', v);
+  removeFromList('watched', v.id);
+  renderVList('watched');
 }
 function removeFromListAndRender(type, vid) {
   removeFromList(type, vid);
