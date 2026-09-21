@@ -233,8 +233,9 @@ function videoCardHTML(v, context) {
 
 function saveVideo(type, v) {
   addToList(type, v);
+  addHidden(v.id);
   const card = document.getElementById('card-'+v.id);
-  if (card) { const btn = card.querySelector('.act.'+{favorites:'star',watchlist:'clock',watched:'check'}[type]); if(btn){btn.style.opacity='0.4';btn.disabled=true;} }
+  if (card) card.remove();
 }
 function saveAndHide(type, v, cardId) {
   addToList(type, v);
