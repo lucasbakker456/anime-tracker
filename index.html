@@ -194,7 +194,7 @@ function addAnime() {
   const list=getAnime(); if(!list.find(a=>a.name===val)){list.push({name:val,season:1});saveAnime(list);renderAnimeList();} inp.value='';
 }
 function removeAnime(i){ const l=getAnime();l.splice(i,1);saveAnime(l);renderAnimeList(); }
-function changeSeason(i,d){ const l=getAnime();l[i].season=Math.max(1,l[i].season+d);saveAnime(l);renderAnimeList(); }
+function changeSeason(i,d){ const l=getAnime();l[i].season=Math.max(0,l[i].season+d);saveAnime(l);renderAnimeList(); }
 document.getElementById('keywordInput').addEventListener('keydown',e=>{if(e.key==='Enter')addAnime();});
 
 // 影片清單頁渲染
@@ -297,8 +297,10 @@ async function searchAll(){
   document.getElementById('results').innerHTML='<div class="loading">搜尋中⋯</div>';
   const hidden=getHidden(); let html='';
   for(const anime of list){
-    const ns=anime.season+1, zh=SEASON_MAP[ns-1]||ns;
-    html+=`<div class="section-title">「${anime.name}」第${ns}季新影片</div>`;
+    const ns=anime.season===0 ? 1 : anime.season+1;
+    const zh=SEASON_MAP[ns-1]||ns;
+    const label=anime.season===0 ? `第1季（未看過）` : `第${ns}季`;
+    html+=`<div class="section-title">「${anime.name}」${label}新影片</div>`;
     try {
       const items=await searchYT(`${anime.name} 第${zh}季`);
       const filtered=items.filter(i=>seasonMatches(i.snippet.title,ns));
