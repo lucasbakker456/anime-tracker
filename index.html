@@ -6,108 +6,128 @@
 <title>動漫新集數追蹤</title>
 <style>
   :root {
-    --bg: #f2f2f7;
-    --surface: #ffffff;
-    --surface2: #f8f8f8;
-    --border: #e0e0e0;
-    --text: #111111;
-    --text2: #555555;
-    --text3: #888888;
-    --accent: #c00;
-    --accent2: #e00;
-    --btn-bg: #e5e5ea;
-    --btn-border: #d0d0d0;
-    --btn-text: #111;
-    --watched: #1a7a4a;
-    --irrelevant: #a00;
-    --watched-bg: #e8f5ee;
-    --irrelevant-bg: #fdecea;
-    --divider: #e0e0e0;
-    --input-bg: #fff;
-    --tag-bg: #e5e5ea;
-    --note: #888;
+    --bg: #f2f2f7; --surface: #fff; --surface2: #f0f0f0;
+    --border: #e0e0e0; --divider: #e0e0e0;
+    --text: #111; --text2: #444; --text3: #888;
+    --input-bg: #fff; --btn-bg: #e5e5ea; --btn-border: #d0d0d0; --btn-text: #111;
+    --accent: #c00; --accent2: #e00;
+    --star: #f5a623; --clock: #4a90e2; --check: #1a7a4a; --cross: #a00;
+    --star-bg: #fff8e6; --clock-bg: #e8f0fc; --check-bg: #e8f5ee; --cross-bg: #fdecea;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #1c1c1e;
-      --surface: #2c2c2e;
-      --surface2: #3a3a3c;
-      --border: #3a3a3c;
-      --text: #f2f2f7;
-      --text2: #cccccc;
-      --text3: #aaaaaa;
-      --accent: #ff453a;
-      --accent2: #ff6961;
-      --btn-bg: #3a3a3c;
-      --btn-border: #555;
-      --btn-text: #f2f2f7;
-      --watched: #30d158;
-      --irrelevant: #ff453a;
-      --watched-bg: #1a2e22;
-      --irrelevant-bg: #2e1a1a;
-      --divider: #3a3a3c;
-      --input-bg: #2c2c2e;
-      --tag-bg: #3a3a3c;
-      --note: #888;
+      --bg: #1c1c1e; --surface: #2c2c2e; --surface2: #3a3a3c;
+      --border: #3a3a3c; --divider: #3a3a3c;
+      --text: #f2f2f7; --text2: #ccc; --text3: #888;
+      --input-bg: #2c2c2e; --btn-bg: #3a3a3c; --btn-border: #555; --btn-text: #f2f2f7;
+      --accent: #ff453a; --accent2: #ff6961;
+      --star: #ffd60a; --clock: #64a8ff; --check: #30d158; --cross: #ff453a;
+      --star-bg: #2a2410; --clock-bg: #10203a; --check-bg: #0f2a1a; --cross-bg: #2a0f0f;
     }
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 20px 16px; max-width: 600px; margin: auto; }
-  h1 { font-size: 22px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
   .add-row { display: flex; gap: 8px; margin-bottom: 16px; }
   input[type="text"] { flex: 1; background: var(--input-bg); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 12px 14px; font-size: 16px; outline: none; }
   input[type="text"]:focus { border-color: #888; }
   button { background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--btn-text); border-radius: 10px; padding: 12px 16px; font-size: 16px; cursor: pointer; white-space: nowrap; font-weight: 500; }
   button:active { opacity: 0.7; }
   button.primary { background: var(--accent); border-color: var(--accent2); color: #fff; }
+
+  /* 分頁 */
+  .tabs { display: flex; gap: 6px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px; }
+  .tab { flex-shrink: 0; padding: 8px 16px; font-size: 14px; font-weight: 600; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text3); cursor: pointer; }
+  .tab.active { background: var(--accent); border-color: var(--accent2); color: #fff; }
+
+  /* 追蹤清單 */
   .anime-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
   .anime-item { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
-  .anime-name { flex: 1; font-size: 15px; line-height: 1.4; color: var(--text); cursor: pointer; border-bottom: 1px dashed var(--border); padding-bottom: 2px; }
+  .anime-name { flex: 1; font-size: 15px; line-height: 1.4; cursor: pointer; border-bottom: 1px dashed var(--border); padding-bottom: 2px; }
   .anime-name-input { flex: 1; background: var(--input-bg); border: 1px solid #888; color: var(--text); border-radius: 8px; padding: 6px 10px; font-size: 15px; outline: none; }
   .season-ctrl { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .season-btn { background: var(--btn-bg); border: 1px solid var(--btn-border); color: var(--btn-text); border-radius: 8px; width: 36px; height: 36px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; font-weight: 600; }
-  .season-btn:active { opacity: 0.7; }
   .season-label { font-size: 14px; color: var(--text2); min-width: 44px; text-align: center; font-weight: 600; }
-  .del-btn { background: none; border: none; color: var(--text3); font-size: 22px; cursor: pointer; padding: 0 4px; flex-shrink: 0; }
-  .del-btn:active { color: var(--irrelevant); }
-  .results { display: flex; flex-direction: column; gap: 14px; }
-  .video-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; text-decoration: none; color: inherit; }
-  .video-main { display: flex; gap: 12px; padding: 12px; }
+  .del-btn { background: none; border: none; color: var(--text3); font-size: 22px; cursor: pointer; padding: 0 4px; }
+
+  /* 影片卡片 */
+  .video-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; margin-bottom: 12px; }
+  .video-main { display: flex; gap: 12px; padding: 12px; text-decoration: none; color: inherit; }
   .thumb-wrap { position: relative; width: 130px; min-width: 130px; height: 74px; flex-shrink: 0; }
   .thumb { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; background: var(--surface2); display: block; }
   .duration { position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.75); color: #fff; font-size: 12px; padding: 1px 5px; border-radius: 4px; font-weight: 600; }
   .info { flex: 1; overflow: hidden; }
-  .title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 6px; }
+  .vtitle { font-size: 15px; font-weight: 600; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 4px; }
   .meta { font-size: 13px; color: var(--text3); }
   .video-actions { display: flex; border-top: 1px solid var(--divider); }
-  .action-btn { flex: 1; padding: 11px; font-size: 14px; font-weight: 600; text-align: center; cursor: pointer; border: none; background: none; }
-  .action-btn.watched { color: var(--watched); border-right: 1px solid var(--divider); }
-  .action-btn.watched:active { background: var(--watched-bg); }
-  .action-btn.irrelevant { color: var(--irrelevant); }
-  .action-btn.irrelevant:active { background: var(--irrelevant-bg); }
+  .act { flex: 1; padding: 10px 4px; font-size: 13px; font-weight: 600; text-align: center; cursor: pointer; border: none; background: none; color: var(--text3); }
+  .act:not(:last-child) { border-right: 1px solid var(--divider); }
+  .act.star:active { background: var(--star-bg); color: var(--star); }
+  .act.clock:active { background: var(--clock-bg); color: var(--clock); }
+  .act.check:active { background: var(--check-bg); color: var(--check); }
+  .act.cross:active { background: var(--cross-bg); color: var(--cross); }
+  .act.active-star { color: var(--star); }
+  .act.active-clock { color: var(--clock); }
+  .act.active-check { color: var(--check); }
+  .act.active-cross { color: var(--cross); }
+
   .section-title { font-size: 14px; color: var(--text3); margin-bottom: 10px; margin-top: 6px; font-weight: 500; }
   .loading { text-align: center; color: var(--text3); font-size: 16px; padding: 24px; }
-  .empty { text-align: center; color: var(--text3); font-size: 14px; padding: 16px; }
-  .note { text-align: center; color: var(--note); font-size: 12px; padding: 4px 0 8px; }
-  .error { color: var(--irrelevant); font-size: 14px; padding: 8px 0; }
+  .empty-state { text-align: center; color: var(--text3); font-size: 14px; padding: 30px 0; }
+  .note { text-align: center; color: var(--text3); font-size: 12px; padding: 4px 0 8px; }
+  .error { color: var(--cross); font-size: 14px; padding: 8px 0; }
+  .page { display: none; }
+  .page.active { display: block; }
+  .clear-btn { font-size: 13px; color: var(--cross); background: none; border: none; padding: 4px 8px; cursor: pointer; float: right; }
 </style>
 </head>
 <body>
 <h1>動漫新集數追蹤</h1>
 
-<div class="add-row">
-  <input type="text" id="keywordInput" placeholder="輸入片名關鍵字" />
-  <button onclick="addAnime()">新增</button>
-  <button class="primary" onclick="searchAll()">搜尋</button>
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('search')">🔍 搜尋</div>
+  <div class="tab" onclick="switchTab('watchlist')">🕐 待觀看</div>
+  <div class="tab" onclick="switchTab('favorites')">⭐ 收藏</div>
+  <div class="tab" onclick="switchTab('watched')">✓ 已看過</div>
 </div>
 
-<div class="anime-list" id="animeList"></div>
-<div id="results" class="results"></div>
+<!-- 搜尋頁 -->
+<div class="page active" id="page-search">
+  <div class="add-row">
+    <input type="text" id="keywordInput" placeholder="輸入片名關鍵字" />
+    <button onclick="addAnime()">新增</button>
+    <button class="primary" onclick="searchAll()">搜尋</button>
+  </div>
+  <div class="anime-list" id="animeList"></div>
+  <div id="results"></div>
+</div>
+
+<!-- 待觀看頁 -->
+<div class="page" id="page-watchlist">
+  <button class="clear-btn" onclick="clearList('watchlist')">清除全部</button>
+  <div style="clear:both;margin-bottom:12px;"></div>
+  <div id="list-watchlist"></div>
+</div>
+
+<!-- 收藏頁 -->
+<div class="page" id="page-favorites">
+  <button class="clear-btn" onclick="clearList('favorites')">清除全部</button>
+  <div style="clear:both;margin-bottom:12px;"></div>
+  <div id="list-favorites"></div>
+</div>
+
+<!-- 已看過頁 -->
+<div class="page" id="page-watched">
+  <button class="clear-btn" onclick="clearList('watched')">清除全部</button>
+  <div style="clear:both;margin-bottom:12px;"></div>
+  <div id="list-watched"></div>
+</div>
 
 <script>
 const API_KEY = 'AIzaSyAhQt6ZK9IdKGQ0BrBPQYFsxQPP2EJ0C_U';
-const STORAGE_KEY = 'anime_list_v4';
-const HIDDEN_KEY = 'anime_hidden_videos';
+const ANIME_KEY = 'anime_list_v4';
+const HIDDEN_KEY = 'anime_hidden_v2'; // 不相關
+const LISTS = { watchlist: 'anime_watchlist', favorites: 'anime_favorites', watched: 'anime_watched' };
 
 const DEFAULT_LIST = [
   { name: '开局大帝我的弟子', season: 1 },
@@ -122,144 +142,172 @@ const DEFAULT_LIST = [
   { name: '他下界签到万年', season: 1 }
 ];
 
-function getList() {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored) return JSON.parse(stored);
-  saveList(DEFAULT_LIST); return DEFAULT_LIST;
+function getAnime() { const s=localStorage.getItem(ANIME_KEY); if(s) return JSON.parse(s); saveAnime(DEFAULT_LIST); return DEFAULT_LIST; }
+function saveAnime(l) { localStorage.setItem(ANIME_KEY, JSON.stringify(l)); }
+function getHidden() { try { return JSON.parse(localStorage.getItem(HIDDEN_KEY)||'[]'); } catch { return []; } }
+function addHidden(vid) { const h=getHidden(); if(!h.includes(vid)){h.push(vid);localStorage.setItem(HIDDEN_KEY,JSON.stringify(h));} }
+function getVList(type) { try { return JSON.parse(localStorage.getItem(LISTS[type])||'[]'); } catch { return []; } }
+function saveVList(type,l) { localStorage.setItem(LISTS[type],JSON.stringify(l)); }
+function addToList(type, video) {
+  const l = getVList(type);
+  if (!l.find(v=>v.id===video.id)) { l.unshift(video); saveVList(type,l); }
 }
-function saveList(list) { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); }
-function getHidden() { try { return JSON.parse(localStorage.getItem(HIDDEN_KEY) || '[]'); } catch { return []; } }
-function hideVideo(vid) {
-  const h = getHidden();
-  if (!h.includes(vid)) { h.push(vid); localStorage.setItem(HIDDEN_KEY, JSON.stringify(h)); }
+function removeFromList(type, vid) {
+  const l = getVList(type).filter(v=>v.id!==vid); saveVList(type,l);
+}
+function clearList(type) {
+  if (confirm('確定清除全部？')) { saveVList(type,[]); renderVList(type); }
 }
 
-function renderList() {
-  const list = getList();
-  document.getElementById('animeList').innerHTML = list.map((a, i) => `
+// 分頁切換
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i)=>{ t.classList.toggle('active', ['search','watchlist','favorites','watched'][i]===tab); });
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  if (tab!=='search') renderVList(tab);
+}
+
+// 追蹤清單
+function renderAnimeList() {
+  const list = getAnime();
+  document.getElementById('animeList').innerHTML = list.map((a,i) => `
     <div class="anime-item">
-      <span class="anime-name" onclick="editName(${i}, this)">${a.name}</span>
+      <span class="anime-name" onclick="editName(${i},this)">${a.name}</span>
       <div class="season-ctrl">
-        <button class="season-btn" onclick="changeSeason(${i}, -1)">−</button>
+        <button class="season-btn" onclick="changeSeason(${i},-1)">−</button>
         <span class="season-label">S${a.season}</span>
-        <button class="season-btn" onclick="changeSeason(${i}, 1)">+</button>
+        <button class="season-btn" onclick="changeSeason(${i},1)">+</button>
       </div>
       <button class="del-btn" onclick="removeAnime(${i})">×</button>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
-
-function editName(i, el) {
-  const list = getList();
-  const input = document.createElement('input');
-  input.type = 'text'; input.className = 'anime-name-input'; input.value = list[i].name;
-  el.replaceWith(input); input.focus(); input.select();
-  function save() {
-    const val = input.value.trim();
-    if (val) { list[i].name = val; saveList(list); }
-    renderList();
-  }
-  input.addEventListener('blur', save);
-  input.addEventListener('keydown', e => { if (e.key==='Enter') input.blur(); if (e.key==='Escape') renderList(); });
+function editName(i,el) {
+  const list=getAnime();
+  const inp=document.createElement('input'); inp.type='text'; inp.className='anime-name-input'; inp.value=list[i].name;
+  el.replaceWith(inp); inp.focus(); inp.select();
+  function save(){ const v=inp.value.trim(); if(v){list[i].name=v;saveAnime(list);} renderAnimeList(); }
+  inp.addEventListener('blur',save);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();if(e.key==='Escape')renderAnimeList();});
 }
-
 function addAnime() {
-  const input = document.getElementById('keywordInput');
-  const val = input.value.trim(); if (!val) return;
-  const list = getList();
-  if (!list.find(a => a.name === val)) { list.push({ name: val, season: 1 }); saveList(list); renderList(); }
-  input.value = '';
+  const inp=document.getElementById('keywordInput'), val=inp.value.trim(); if(!val) return;
+  const list=getAnime(); if(!list.find(a=>a.name===val)){list.push({name:val,season:1});saveAnime(list);renderAnimeList();} inp.value='';
 }
-function removeAnime(i) { const list=getList(); list.splice(i,1); saveList(list); renderList(); }
-function changeSeason(i, delta) { const list=getList(); list[i].season=Math.max(1,list[i].season+delta); saveList(list); renderList(); }
-document.getElementById('keywordInput').addEventListener('keydown', e => { if(e.key==='Enter') addAnime(); });
+function removeAnime(i){ const l=getAnime();l.splice(i,1);saveAnime(l);renderAnimeList(); }
+function changeSeason(i,d){ const l=getAnime();l[i].season=Math.max(1,l[i].season+d);saveAnime(l);renderAnimeList(); }
+document.getElementById('keywordInput').addEventListener('keydown',e=>{if(e.key==='Enter')addAnime();});
 
-const SEASON_MAP = ['一','二','三','四','五','六','七','八','九','十'];
-function seasonMatches(title, season) {
-  const zh = SEASON_MAP[season-1];
-  return [`第${zh}季`,`第${season}季`,`S${season}`,`season ${season}`,`Season ${season}`].some(p=>title.includes(p));
-}
-
-async function searchYT(query) {
-  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&order=date&maxResults=10&key=${API_KEY}`;
-  const res = await fetch(url); if (!res.ok) throw new Error('API 錯誤 '+res.status);
-  return (await res.json()).items || [];
-}
-async function getDurations(videoIds) {
-  const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${videoIds.join(',')}&key=${API_KEY}`;
-  const res = await fetch(url); if (!res.ok) return {};
-  const map = {};
-  for (const item of (await res.json()).items||[]) map[item.id] = parseDuration(item.contentDetails.duration);
-  return map;
-}
-function parseDuration(iso) {
-  const m = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/); if (!m) return '';
-  const h=parseInt(m[1]||0), min=parseInt(m[2]||0), s=parseInt(m[3]||0);
-  if (h>0) return `${h}:${String(min).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  return `${min}:${String(s).padStart(2,'0')}`;
-}
-function timeAgo(dateStr) {
-  const diff=(Date.now()-new Date(dateStr))/1000;
-  if (diff<3600) return Math.floor(diff/60)+' 分鐘前';
-  if (diff<86400) return Math.floor(diff/3600)+' 小時前';
-  if (diff<86400*30) return Math.floor(diff/86400)+' 天前';
-  return new Date(dateStr).toLocaleDateString('zh-TW');
-}
-function markAndHide(vid, cardId) {
-  hideVideo(vid);
-  const card = document.getElementById(cardId); if (card) card.remove();
+// 影片清單頁渲染
+function renderVList(type) {
+  const items = getVList(type);
+  const el = document.getElementById('list-'+type);
+  if (items.length===0) { el.innerHTML='<div class="empty-state">尚無影片</div>'; return; }
+  el.innerHTML = items.map(v => videoCardHTML(v, type)).join('');
 }
 
-async function searchAll() {
-  const list = getList();
-  if (list.length===0) { document.getElementById('results').innerHTML='<div class="empty">請先新增片名</div>'; return; }
+function videoCardHTML(v, context) {
+  const isStored = ['watchlist','favorites','watched'].includes(context);
+  const removeBtn = isStored ? `<button class="act cross" onclick="removeFromListAndRender('${context}','${v.id}')">✕ 移除</button>` : '';
+  return `
+    <div class="video-card" id="card-${v.id}">
+      <a class="video-main" href="https://www.youtube.com/watch?v=${v.id}" target="_blank">
+        <div class="thumb-wrap">
+          <img class="thumb" src="${v.thumb}" alt="" />
+          ${v.dur?`<span class="duration">${v.dur}</span>`:''}
+        </div>
+        <div class="info">
+          <div class="vtitle">${v.title}</div>
+          <div class="meta">${v.channel} · ${v.ago}</div>
+        </div>
+      </a>
+      <div class="video-actions">
+        ${!isStored ? `
+        <button class="act star" onclick="saveVideo('favorites',${JSON.stringify(v).replace(/"/g,'&quot;')})">⭐ 收藏</button>
+        <button class="act clock" onclick="saveVideo('watchlist',${JSON.stringify(v).replace(/"/g,'&quot;')})">🕐 待看</button>
+        <button class="act check" onclick="saveAndHide('watched',${JSON.stringify(v).replace(/"/g,'&quot;')},'card-${v.id}')">✓ 已看過</button>
+        <button class="act cross" onclick="justHide('${v.id}','card-${v.id}')">✕ 不相關</button>
+        ` : removeBtn}
+      </div>
+    </div>`;
+}
+
+function saveVideo(type, v) {
+  addToList(type, v);
+  const card = document.getElementById('card-'+v.id);
+  if (card) { const btn = card.querySelector('.act.'+{favorites:'star',watchlist:'clock',watched:'check'}[type]); if(btn){btn.style.opacity='0.4';btn.disabled=true;} }
+}
+function saveAndHide(type, v, cardId) {
+  addToList(type, v);
+  addHidden(v.id);
+  const card=document.getElementById(cardId); if(card) card.remove();
+}
+function justHide(vid, cardId) {
+  addHidden(vid);
+  const card=document.getElementById(cardId); if(card) card.remove();
+}
+function removeFromListAndRender(type, vid) {
+  removeFromList(type, vid);
+  renderVList(type);
+}
+
+// YouTube 搜尋
+const SEASON_MAP=['一','二','三','四','五','六','七','八','九','十'];
+function seasonMatches(title,s){
+  const zh=SEASON_MAP[s-1];
+  return [`第${zh}季`,`第${s}季`,`S${s}`,`season ${s}`,`Season ${s}`].some(p=>title.includes(p));
+}
+async function searchYT(q){
+  const r=await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(q)}&type=video&order=date&maxResults=10&key=${API_KEY}`);
+  if(!r.ok) throw new Error('API錯誤 '+r.status);
+  return (await r.json()).items||[];
+}
+async function getDurations(ids){
+  const r=await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=${ids.join(',')}&key=${API_KEY}`);
+  if(!r.ok) return {};
+  const m={};
+  for(const item of (await r.json()).items||[]) m[item.id]=parseDur(item.contentDetails.duration);
+  return m;
+}
+function parseDur(iso){
+  const m=iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/); if(!m) return '';
+  const h=+m[1]||0,min=+m[2]||0,s=+m[3]||0;
+  return h>0?`${h}:${String(min).padStart(2,'0')}:${String(s).padStart(2,'0')}`:`${min}:${String(s).padStart(2,'0')}`;
+}
+function timeAgo(d){
+  const diff=(Date.now()-new Date(d))/1000;
+  if(diff<3600) return Math.floor(diff/60)+' 分鐘前';
+  if(diff<86400) return Math.floor(diff/3600)+' 小時前';
+  if(diff<86400*30) return Math.floor(diff/86400)+' 天前';
+  return new Date(d).toLocaleDateString('zh-TW');
+}
+
+async function searchAll(){
+  const list=getAnime();
+  if(!list.length){document.getElementById('results').innerHTML='<div class="empty-state">請先新增片名</div>';return;}
   document.getElementById('results').innerHTML='<div class="loading">搜尋中⋯</div>';
-  const hidden = getHidden();
-  let html = '';
-  for (const anime of list) {
-    const nextSeason = anime.season+1;
-    const zh = SEASON_MAP[nextSeason-1]||nextSeason;
-    const query = `${anime.name} 第${zh}季`;
-    html += `<div class="section-title">「${anime.name}」第${nextSeason}季新影片</div>`;
+  const hidden=getHidden(); let html='';
+  for(const anime of list){
+    const ns=anime.season+1, zh=SEASON_MAP[ns-1]||ns;
+    html+=`<div class="section-title">「${anime.name}」第${ns}季新影片</div>`;
     try {
-      const items = await searchYT(query);
-      const filtered = items.filter(item=>seasonMatches(item.snippet.title,nextSeason));
-      const show = (filtered.length>0?filtered:items).filter(item=>!hidden.includes(item.id.videoId));
-      const note = filtered.length===0 ? '<div class="note">（找不到精確季數，顯示相關影片）</div>' : '';
-      if (show.length===0) { html+=`<div class="empty">找不到第${nextSeason}季相關影片</div>`; }
-      else {
-        html += note;
-        const ids = show.slice(0,5).map(i=>i.id.videoId);
-        const durations = await getDurations(ids);
-        for (const item of show.slice(0,5)) {
-          const vid=item.id.videoId, s=item.snippet;
-          const thumb=s.thumbnails?.medium?.url||'', dur=durations[vid]||'';
-          const cardId=`card-${vid}`;
-          html += `
-            <div class="video-card" id="${cardId}">
-              <a class="video-main" href="https://www.youtube.com/watch?v=${vid}" target="_blank">
-                <div class="thumb-wrap">
-                  <img class="thumb" src="${thumb}" alt="" />
-                  ${dur?`<span class="duration">${dur}</span>`:''}
-                </div>
-                <div class="info">
-                  <div class="title">${s.title}</div>
-                  <div class="meta">${s.channelTitle} · ${timeAgo(s.publishedAt)}</div>
-                </div>
-              </a>
-              <div class="video-actions">
-                <button class="action-btn watched" onclick="markAndHide('${vid}','${cardId}')">✓ 已看過</button>
-                <button class="action-btn irrelevant" onclick="markAndHide('${vid}','${cardId}')">✕ 不相關</button>
-              </div>
-            </div>`;
-        }
+      const items=await searchYT(`${anime.name} 第${zh}季`);
+      const filtered=items.filter(i=>seasonMatches(i.snippet.title,ns));
+      const show=(filtered.length?filtered:items).filter(i=>!hidden.includes(i.id.videoId));
+      const note=filtered.length===0?'<div class="note">（找不到精確季數，顯示相關影片）</div>':'';
+      if(!show.length){html+=`<div class="empty-state" style="padding:12px">找不到第${ns}季相關影片</div>`;continue;}
+      html+=note;
+      const durs=await getDurations(show.slice(0,5).map(i=>i.id.videoId));
+      for(const item of show.slice(0,5)){
+        const vid=item.id.videoId, s=item.snippet;
+        const v={id:vid,title:s.title,channel:s.channelTitle,ago:timeAgo(s.publishedAt),thumb:s.thumbnails?.medium?.url||'',dur:durs[vid]||''};
+        html+=videoCardHTML(v,'search');
       }
-    } catch(e) { html+=`<div class="error">搜尋失敗：${e.message}</div>`; }
+    } catch(e){html+=`<div class="error">搜尋失敗：${e.message}</div>`;}
   }
-  document.getElementById('results').innerHTML = html;
+  document.getElementById('results').innerHTML=html;
 }
 
-renderList();
+renderAnimeList();
 </script>
 </body>
 </html>
