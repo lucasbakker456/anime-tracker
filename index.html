@@ -52,7 +52,8 @@
   .season-label { font-size: 14px; color: var(--text2); min-width: 44px; text-align: center; font-weight: 600; }
   .del-btn { background: none; border: none; color: var(--text3); font-size: 22px; cursor: pointer; padding: 0 4px; }
   .video-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; margin-bottom: 12px; }
-  .video-main { display: flex; gap: 12px; padding: 12px; text-decoration: none; color: inherit; }
+  .video-main { display: flex; gap: 12px; padding: 12px; }
+  .video-main a { flex-shrink: 0; display: block; }
   .thumb-wrap { position: relative; width: 130px; min-width: 130px; height: 74px; flex-shrink: 0; }
   .thumb { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; background: var(--surface2); display: block; }
   .duration { position: absolute; bottom: 4px; right: 4px; background: rgba(0,0,0,0.75); color: #fff; font-size: 12px; padding: 1px 5px; border-radius: 4px; font-weight: 600; }
@@ -306,16 +307,18 @@ function videoCardHTML(v, context) {
   }
   return `
     <div class="video-card" id="card-${v.id}">
-      <a class="video-main" href="https://www.youtube.com/watch?v=${v.id}" target="_blank">
-        <div class="thumb-wrap">
-          <img class="thumb" src="${v.thumb}" alt="" />
-          ${v.dur?`<span class="duration">${v.dur}</span>`:''}
-        </div>
+      <div class="video-main">
+        <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" style="flex-shrink:0;">
+          <div class="thumb-wrap">
+            <img class="thumb" src="${v.thumb}" alt="" />
+            ${v.dur?`<span class="duration">${v.dur}</span>`:''}
+          </div>
+        </a>
         <div class="info">
           <div class="vtitle" onclick="editVideoTitle(event,'${v.id}','${context}')" title="點擊自訂名稱">${v.customTitle||v.title}</div>
           <div class="meta">${v.channel} · ${v.ago}</div>
         </div>
-      </a>
+      </div>
       <div class="video-actions">${actions}</div>
     </div>`;
 }
