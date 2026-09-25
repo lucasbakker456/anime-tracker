@@ -277,19 +277,33 @@ async function changeSeason(i, d) {
 
 document.getElementById('keywordInput').addEventListener('keydown',e=>{if(e.key==='Enter')addAnime();});
 
-// 影片清單
+// 去掉末尾季數標記取得分組用主體片名
+function baseTitle(title) {
+  return (title||'').replace(/[\s·\-~～]+[sS]?\d+[\s~～\-]*[sS]?\d*\s*$/, '').replace(/第[一二三四五六七八九十\d]+季.*/, '').trim();
+}
+
+// 影片清單（含分組縮排）
 async function renderVList(type) {
   const el=document.getElementById('list-'+type);
   el.innerHTML='<div class="loading">載入中⋯</div>';
-  const items=await sbGetVideos(type);
-  if(!items.length){el.innerHTML='<div class="empty-state">尚無影片</div>';return;}
-  el.innerHTML=items.map(row=>{
-    const v={id:row.video_id,title:row.title,channel:row.channel,ago:row.ago,thumb:row.thumb,dur:row.dur};
-    return videoCardHTML(v,type);
-  }).join('');
+  const rows=await sbGetVideos(type);
+  if(!rows.length){el.innerHTML='<div class="empty-state">尚無影片</div>';return;}
+  const items=rows.map(row=>({id:row.video_id,title:row.title,channel:row.channel,ago:row.ago,thumb:row.thumb,dur:row.dur}));
+  const groups={}, order=[];
+  for(const v of items){
+    const key=baseTitle(v.title)||v.title;
+    if(!groups[key]){groups[key]=[];order.push(key);}
+    groups[key].push(v);
+  }
+  let html='';
+  for(const key of order){
+    groups[key].forEach((v,i)=>{ html+=videoCardHTML(v,type,i>0); });
+  }
+  el.innerHTML=html;
 }
 
-function videoCardHTML(v, context) {
+function videoCardHTML(v, context, indented=false) {
+  const indentStyle = indented ? 'margin-left:20px;border-left:3px solid var(--border);' : '';
   const isStored=['watchlist','favorites','watched'].includes(context);
   let actions='';
   if(!isStored){
@@ -306,7 +320,7 @@ function videoCardHTML(v, context) {
     actions=`<button class="act cross" onclick="removeVideo('${context}','${v.id}')">✕ 移除</button>`;
   }
   return `
-    <div class="video-card" id="card-${v.id}">
+    <div class="video-card" id="card-${v.id}" style="${indentStyle}">
       <div class="video-main">
         <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" style="flex-shrink:0;">
           <div class="thumb-wrap">
