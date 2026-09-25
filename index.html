@@ -279,7 +279,7 @@ document.getElementById('keywordInput').addEventListener('keydown',e=>{if(e.key=
 
 // 去掉末尾季數標記取得分組用主體片名
 function baseTitle(title) {
-  return (title||'').replace(/[\s·\-~～]+[sS]?\d+[\s~～\-]*[sS]?\d*\s*$/, '').replace(/第[一二三四五六七八九十\d]+季.*/, '').trim();
+  return (title||"").replace(/[\s·~～-]+[sS]?\d+[\s~～-]*[sS]?\d*\s*$/, "").replace(/第[一二三四五六七八九十\d]+季.*/, "").trim();
 }
 
 // 影片清單（含分組縮排）
