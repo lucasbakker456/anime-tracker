@@ -279,7 +279,14 @@ document.getElementById('keywordInput').addEventListener('keydown',e=>{if(e.key=
 
 // 去掉末尾季數標記取得分組用主體片名
 function baseTitle(title) {
-  return (title||"").replace(/[\s·~～-]+[sS]?\d+[\s~～-]*[sS]?\d*\s*$/, "").replace(/第[一二三四五六七八九十\d]+季.*/, "").trim();
+  if (!title) return '';
+  // 移除末尾的 s1~s5 / S1~S5 / s1 / 第一季 等季數標記
+  let t = title;
+  t = t.replace(/[sS]\d+\s*[~～\-]\s*[sS]?\d+\s*$/, '');
+  t = t.replace(/[sS]\d+\s*$/, '');
+  t = t.replace(/第[一二三四五六七八九十百\d]+季.*$/, '');
+  t = t.replace(/[\s·\-]+$/, '');
+  return t.trim();
 }
 
 // 影片清單（含分組縮排）
@@ -289,9 +296,16 @@ async function renderVList(type) {
   const rows=await sbGetVideos(type);
   if(!rows.length){el.innerHTML='<div class="empty-state">尚無影片</div>';return;}
   const items=rows.map(row=>({id:row.video_id,title:row.title,channel:row.channel,ago:row.ago,thumb:row.thumb,dur:row.dur}));
+  // 只有看起來像自訂短片名的才參與分組（長度<40且不以特殊符號/英文大寫開頭）
+  function isCustomTitle(t) {
+    if (!t) return false;
+    if (t.length > 40) return false;
+    if (/^[【✨🔥💥⚡🎉🎊ABCDEFGHIJKLMNOPQRSTUVWXYZ]/.test(t)) return false;
+    return true;
+  }
   const groups={}, order=[];
   for(const v of items){
-    const key=baseTitle(v.title)||v.title;
+    const key = isCustomTitle(v.title) ? (baseTitle(v.title)||v.title) : ('__solo__'+v.id);
     if(!groups[key]){groups[key]=[];order.push(key);}
     groups[key].push(v);
   }
