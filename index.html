@@ -315,11 +315,18 @@ async function renderVList(type) {
   if(!rows.length){el.innerHTML='<div class="empty-state">尚無影片</div>';return;}
   const items=rows.map(row=>({id:row.video_id,title:row.title,channel:row.channel,ago:row.ago,thumb:row.thumb,dur:row.dur}));
 
+  function extractStartSeason(title) {
+    const m = title.match(/[sS](\d+)/);
+    return m ? parseInt(m[1]) : 999;
+  }
   const groups={}, order=[];
   for(const v of items){
     const key = isCustomTitle(v.title) ? (baseTitle(v.title)||v.title) : ('__solo__'+v.id);
     if(!groups[key]){groups[key]=[];order.push(key);}
     groups[key].push(v);
+  }
+  for(const key of order){
+    groups[key].sort((a,b)=>extractStartSeason(a.title)-extractStartSeason(b.title));
   }
 
   let html='';
